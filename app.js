@@ -5,49 +5,74 @@ document.getElementById('ts-now').textContent = new Date().toLocaleString('es-MX
   day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'
 });
 
-// ===== Status -> color mapping =====
-function statusColor(status){
-  if(!status) return {color:'var(--gray)', dim:'var(--gray-dim)'};
-  const s = status.toUpperCase();
-  if(s.includes('CORRIENDO')) return {color:'var(--green)', dim:'var(--green-dim)'};
-  if(s.includes('MONTANDO')) return {color:'var(--amber)', dim:'var(--amber-dim)'};
-  if(s.includes('OFFLINE')) return {color:'var(--gray)', dim:'var(--gray-dim)'};
-  return {color:'var(--cyan)', dim:'var(--cyan-dim)'};
+// ===== Theme toggle =====
+const THEME_KEY = 'reporte-avances-theme';
+const root = document.documentElement;
+const themeToggleBtn = document.getElementById('theme-toggle');
+
+function cssVar(name){
+  return getComputedStyle(root).getPropertyValue(name).trim();
 }
 
+function setTheme(theme){
+  root.setAttribute('data-theme', theme);
+  themeToggleBtn.setAttribute('aria-label', theme === 'light' ? 'Cambiar a tema oscuro' : 'Cambiar a tema claro');
+  themeToggleBtn.innerHTML = theme === 'light' ? ICON_MOON : ICON_SUN;
+  try { localStorage.setItem(THEME_KEY, theme); } catch(e) {}
+  rebuildCharts();
+}
+
+const ICON_SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>';
+const ICON_MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/></svg>';
+
+let savedTheme = 'dark';
+try { savedTheme = localStorage.getItem(THEME_KEY) || 'dark'; } catch(e) {}
+root.setAttribute('data-theme', savedTheme);
+themeToggleBtn.innerHTML = savedTheme === 'light' ? ICON_MOON : ICON_SUN;
+themeToggleBtn.setAttribute('aria-label', savedTheme === 'light' ? 'Cambiar a tema oscuro' : 'Cambiar a tema claro');
+themeToggleBtn.addEventListener('click', () => {
+  setTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+});
+
 // ===================== CARATULA =====================
-const lineGrid = document.getElementById('line-grid');
+const caratulaBody = document.getElementById('caratula-body');
 let onlineCount = 0;
 
-CARATULA.forEach(line => {
-  const sc = statusColor(line.status);
+function statusTag(status){
+  const s = (status || '').toUpperCase();
+  let cls = 'gray';
+  if(s.includes('CORRIENDO')) cls = 'green';
+  else if(s.includes('MONTANDO')) cls = 'amber';
+  else if(s.includes('OFFLINE')) cls = 'gray';
+  else if(status) cls = 'cyan';
+  return `<span class="status-tag ${cls}"><span class="led"></span>${status || '—'}</span>`;
+}
+
+function pct(v){
+  if(typeof v === 'number') return `${v}%`;
+  return v ?? '—';
+}
+
+caratulaBody.innerHTML = CARATULA.map(line => {
   if(line.status && line.status.toUpperCase().includes('CORRIENDO')) onlineCount++;
-
-  const avanceGlobal = (typeof line.avance_global === 'number') ? line.avance_global : 0;
-  const liberacion = (typeof line.liberacion === 'number') ? line.liberacion : 0;
-
-  const card = document.createElement('div');
-  card.className = 'line-card';
-  card.style.setProperty('--led-color', sc.color);
-  card.style.setProperty('--led-dim', sc.dim);
-
-  card.innerHTML = `
-    <div class="line-top">
-      <div class="line-code">${line.linea}</div>
-      <div class="led"></div>
-    </div>
-    <div class="status-pill">${line.status || '—'}</div>
-    <div class="line-meta">
-      <div class="line-row"><span class="k">WO actual</span><span class="v">${line.wo ?? '—'}</span></div>
-      <div class="line-row"><span class="k">Siguiente WO</span><span class="v">${line.siguiente ?? '—'}</span></div>
-    </div>
-    <div class="progress-track"><div class="progress-fill" style="width:${avanceGlobal}%"></div></div>
-    <div class="progress-label"><span>Avance surtido</span><span>${avanceGlobal}%</span></div>
-    <div class="progress-track"><div class="progress-fill" style="width:${liberacion}%; opacity:.7;"></div></div>
-    <div class="progress-label"><span>% Liberación a línea</span><span>${liberacion}%</span></div>
+  return `
+    <tr>
+      <td class="mono" style="font-weight:600">${line.linea}</td>
+      <td class="mono">${line.wo ?? '—'}</td>
+      <td class="mono">${line.modelo ?? '—'}</td>
+      <td>${statusTag(line.status)}</td>
+      <td class="mono" style="text-align:right">${line.plan ?? '—'}</td>
+      <td class="mono" style="text-align:right">${line.togo ?? '—'}</td>
+      <td class="mono" style="text-align:right">${line.alcance ?? '—'}</td>
+      <td class="mono" style="text-align:right">${pct(line.avance_linea)}</td>
+      <td class="mono">${line.siguiente ?? '—'}</td>
+      <td class="mono">${line.modelo2 ?? '—'}</td>
+      <td class="mono" style="text-align:right">${line.plan2 ?? '—'}</td>
+      <td class="mono" style="text-align:right; font-weight:600">${pct(line.avance_global)}</td>
+      <td class="mono" style="text-align:right; font-weight:600">${pct(line.liberacion)}</td>
+    </tr>
   `;
-  lineGrid.appendChild(card);
-});
+}).join('');
 
 document.getElementById('caratula-sub').textContent = `${onlineCount} de ${CARATULA.length} líneas corriendo`;
 
@@ -115,66 +140,82 @@ ctbBody.innerHTML = CTB.familias.map(f => `
   </tr>
 `).join('');
 
-Chart.defaults.font.family = "'IBM Plex Mono', monospace";
-Chart.defaults.color = '#7c8a99';
+let radarChartInstance = null;
+let donutChartInstance = null;
 
-// Radar chart — % cobertura por familia
-new Chart(document.getElementById('radarChart'), {
-  type: 'radar',
-  data: {
-    labels: CTB.familias.map(f => f.familia),
-    datasets: [{
-      label: '% Cobertura',
-      data: CTB.familias.map(f => f.cobertura),
-      backgroundColor: 'rgba(54,197,217,0.18)',
-      borderColor: '#36c5d9',
-      borderWidth: 2,
-      pointBackgroundColor: '#36c5d9',
-      pointBorderColor: '#0a0e13',
-      pointRadius: 4,
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      r: {
-        min: 0, max: 100,
-        ticks: { display: false, stepSize: 25 },
-        grid: { color: '#1f2730' },
-        angleLines: { color: '#1f2730' },
-        pointLabels: { color: '#e9eef3', font: { size: 11 } }
-      }
+function rebuildCharts(){
+  const muted = cssVar('--muted');
+  const border = cssVar('--border');
+  const text = cssVar('--text');
+  const cyan = cssVar('--cyan');
+  const cyanFill = cssVar('--cyan-dim');
+  const panel = cssVar('--panel');
+  const green = cssVar('--green');
+  const amber = cssVar('--amber');
+  const red = cssVar('--red');
+
+  Chart.defaults.font.family = "'IBM Plex Mono', monospace";
+  Chart.defaults.color = muted;
+
+  if(radarChartInstance) radarChartInstance.destroy();
+  if(donutChartInstance) donutChartInstance.destroy();
+
+  radarChartInstance = new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+      labels: CTB.familias.map(f => f.familia),
+      datasets: [{
+        label: '% Cobertura',
+        data: CTB.familias.map(f => f.cobertura),
+        backgroundColor: cyanFill,
+        borderColor: cyan,
+        borderWidth: 2,
+        pointBackgroundColor: cyan,
+        pointBorderColor: panel,
+        pointRadius: 4,
+      }]
     },
-    plugins: { legend: { display: false } }
-  }
-});
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { display: false, stepSize: 25 },
+          grid: { color: border },
+          angleLines: { color: border },
+          pointLabels: { color: text, font: { size: 11 } }
+        }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
 
-// Donut chart — distribución global
-const donutCtx = document.getElementById('donutChart');
-const donutColors = { green:'#2dd4a7', yellow:'#f0b429', red:'#ef5b5b' };
-new Chart(donutCtx, {
-  type: 'doughnut',
-  data: {
-    labels: ['Green', 'Yellow', 'Red'],
-    datasets: [{
-      data: [CTB.donut.green, CTB.donut.yellow, CTB.donut.red],
-      backgroundColor: [donutColors.green, donutColors.yellow, donutColors.red],
-      borderColor: '#11161d',
-      borderWidth: 3,
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    cutout: '68%',
-    plugins: { legend: { display: false } }
-  }
-});
+  donutChartInstance = new Chart(document.getElementById('donutChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Green', 'Yellow', 'Red'],
+      datasets: [{
+        data: [CTB.donut.green, CTB.donut.yellow, CTB.donut.red],
+        backgroundColor: [green, amber, red],
+        borderColor: panel,
+        borderWidth: 3,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '68%',
+      plugins: { legend: { display: false } }
+    }
+  });
 
-const donutTotal = CTB.donut.green + CTB.donut.yellow + CTB.donut.red;
-document.getElementById('donut-legend').innerHTML = `
-  <div class="legend-item"><span class="legend-dot" style="background:${donutColors.green}"></span>Green &middot; ${fmtNum(CTB.donut.green)} (${(CTB.donut.green/donutTotal*100).toFixed(1)}%)</div>
-  <div class="legend-item"><span class="legend-dot" style="background:${donutColors.yellow}"></span>Yellow &middot; ${fmtNum(CTB.donut.yellow)} (${(CTB.donut.yellow/donutTotal*100).toFixed(1)}%)</div>
-  <div class="legend-item"><span class="legend-dot" style="background:${donutColors.red}"></span>Red &middot; ${fmtNum(CTB.donut.red)} (${(CTB.donut.red/donutTotal*100).toFixed(1)}%)</div>
-`;
+  const donutTotal = CTB.donut.green + CTB.donut.yellow + CTB.donut.red;
+  document.getElementById('donut-legend').innerHTML = `
+    <div class="legend-item"><span class="legend-dot" style="background:${green}"></span>Green &middot; ${fmtNum(CTB.donut.green)} (${(CTB.donut.green/donutTotal*100).toFixed(1)}%)</div>
+    <div class="legend-item"><span class="legend-dot" style="background:${amber}"></span>Yellow &middot; ${fmtNum(CTB.donut.yellow)} (${(CTB.donut.yellow/donutTotal*100).toFixed(1)}%)</div>
+    <div class="legend-item"><span class="legend-dot" style="background:${red}"></span>Red &middot; ${fmtNum(CTB.donut.red)} (${(CTB.donut.red/donutTotal*100).toFixed(1)}%)</div>
+  `;
+}
+
+rebuildCharts();
