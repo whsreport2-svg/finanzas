@@ -192,6 +192,50 @@
   }
 
   /* ============================================================
+     BARRA DE PESTAÑAS (navegación por sección en mobile)
+     En escritorio se oculta y todos los paneles se muestran juntos
+     en el grid original; en mobile solo el panel activo es visible.
+     ============================================================ */
+  .tabbar{
+    display:none;
+    position:fixed;
+    left:0;right:0;bottom:0;
+    z-index:40;
+    background:var(--panel);
+    border-top:1px solid var(--border);
+    padding:4px 4px calc(4px + env(safe-area-inset-bottom));
+  }
+  .tab-btn{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    border:0;
+    background:transparent;
+    color:var(--fg-faint);
+    padding:7px 2px 6px;
+    font-family:var(--font-body);
+    font-size:10px;
+    letter-spacing:.01em;
+    cursor:pointer;
+    border-radius:8px;
+  }
+  .tab-btn svg{width:21px;height:21px;}
+  .tab-btn.active{color:var(--gold);}
+  .tab-btn:active{background:var(--panel-2);}
+
+  .tab-panel{display:block;}
+
+  @media (max-width:860px){
+    .tabbar{display:flex;}
+    .tab-panel{display:none;}
+    .tab-panel[data-active="true"]{display:block;}
+    main{padding-bottom:calc(70px + env(safe-area-inset-bottom)) !important;}
+  }
+
+  /* ============================================================
      LAYOUT
      ============================================================ */
   main{
@@ -564,7 +608,7 @@
      targets táctiles deben rondar 44px para no fallar el tap.
      ============================================================ */
   @media (max-width:600px){
-    main{padding:16px 14px 48px;gap:14px;}
+    main{padding:16px 14px calc(70px + env(safe-area-inset-bottom));gap:14px;}
     .panel-body{padding:14px;}
     .panel-head{padding:11px 14px;}
 
@@ -629,9 +673,29 @@
   </div>
 </header>
 
+<!-- ===================== BARRA DE PESTAÑAS (mobile) ===================== -->
+<nav class="tabbar" role="tablist" aria-label="Secciones">
+  <button type="button" class="tab-btn" data-tab="registrar" role="tab" aria-selected="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    <span>Registrar</span>
+  </button>
+  <button type="button" class="tab-btn" data-tab="dashboard" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="3.4" height="8"/><rect x="10.3" y="5.5" width="3.4" height="12.5"/><rect x="16.6" y="13" width="3.4" height="5"/></svg>
+    <span>Dashboard</span>
+  </button>
+  <button type="button" class="tab-btn" data-tab="metas" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.9" fill="currentColor" stroke="none"/></svg>
+    <span>Metas</span>
+  </button>
+  <button type="button" class="tab-btn" data-tab="historial" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12,7 12,12 16,14"/></svg>
+    <span>Historial</span>
+  </button>
+</nav>
+
 <main>
   <!-- ===================== FORMULARIO ===================== -->
-  <section class="panel" aria-labelledby="form-title">
+  <section class="panel tab-panel" data-tab-panel="registrar" aria-labelledby="form-title">
     <div class="panel-head"><h2 id="form-title">Nueva transacción</h2></div>
     <div class="panel-body">
       <form id="tx-form" novalidate>
@@ -690,7 +754,7 @@
   </section>
 
   <!-- ===================== DASHBOARD ===================== -->
-  <section class="panel" aria-labelledby="dash-title">
+  <section class="panel tab-panel" data-tab-panel="dashboard" aria-labelledby="dash-title">
     <div class="panel-head"><h2 id="dash-title">Dashboard</h2></div>
     <div class="panel-body charts-grid">
       <div class="chart-box">
@@ -705,7 +769,7 @@
   </section>
 
   <!-- ===================== METAS, AHORRO Y DEUDAS ===================== -->
-  <section class="panel metas-panel" aria-labelledby="metas-title">
+  <section class="panel metas-panel tab-panel" data-tab-panel="metas" aria-labelledby="metas-title">
     <div class="panel-head"><h2 id="metas-title">Metas, ahorro y deudas</h2></div>
     <div class="panel-body">
 
@@ -783,7 +847,7 @@
   </section>
 
   <!-- ===================== HISTORIAL ===================== -->
-  <section class="panel history-panel" aria-labelledby="hist-title">
+  <section class="panel history-panel tab-panel" data-tab-panel="historial" aria-labelledby="hist-title">
     <div class="panel-head">
       <h2 id="hist-title">Historial de transacciones</h2>
       <div class="history-head-actions">
@@ -995,6 +1059,10 @@
     bfDeuda: document.getElementById('bf-deuda'),
     bfTotal: document.getElementById('bf-total'),
   };
+
+  // Botones y paneles de la barra de pestañas
+  const tabBtns = Array.from(document.querySelectorAll('.tab-btn'));
+  const tabPanels = Array.from(document.querySelectorAll('.tab-panel'));
 
   /** Aplica los filtros activos y devuelve la lista resultante, más reciente primero */
   function obtenerFiltradas() {
@@ -1514,6 +1582,36 @@
       && typeof t.metodo === 'string';
   }
 
+  // --- Barra de pestañas (navegación por sección, principalmente mobile) ---
+  const TAB_KEY = 'libromayor_tab_activa';
+
+  function activarTab(nombre) {
+    tabPanels.forEach(panel => {
+      panel.dataset.active = String(panel.dataset.tabPanel === nombre);
+    });
+    tabBtns.forEach(btn => {
+      const activo = btn.dataset.tab === nombre;
+      btn.classList.toggle('active', activo);
+      btn.setAttribute('aria-selected', String(activo));
+    });
+    localStorage.setItem(TAB_KEY, nombre);
+
+    // Los gráficos se crean con ancho 0 si su panel estaba oculto; se
+    // redibujan al mostrarse para que tomen las dimensiones reales.
+    if (nombre === 'dashboard') {
+      requestAnimationFrame(renderGraficos);
+    }
+
+    // Al cambiar de sección en mobile, sube el scroll para ver el panel desde el inicio
+    if (window.matchMedia('(max-width:860px)').matches) {
+      window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+    }
+  }
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => activarTab(btn.dataset.tab));
+  });
+
   // --- Tema oscuro / claro ---
   const btnDark = document.getElementById('btn-theme-dark');
   const btnLight = document.getElementById('btn-theme-light');
@@ -1553,6 +1651,10 @@
     el.mAguinaldo.value = estadoMetas.aguinaldo || '';
     el.mPtu.value = estadoMetas.ptu || '';
     renderTarjetas();
+
+    // Activa la última pestaña usada (o "Registrar" la primera vez)
+    const tabGuardada = localStorage.getItem(TAB_KEY);
+    activarTab(tabBtns.some(b => b.dataset.tab === tabGuardada) ? tabGuardada : 'registrar');
 
     renderTodo();
   })();
