@@ -2,7 +2,12 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LibroMayor">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f1419">
 <title>Libro Mayor · Control de Gastos Personales</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -58,12 +63,13 @@
     --brick-soft:#f4ddd5;
   }
 
-  *{box-sizing:border-box;}
-  html{color-scheme:dark;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{color-scheme:dark;height:100%;}
   [data-theme="light"] html{color-scheme:light;}
 
   body{
     margin:0;
+    min-height:100%;
     background:var(--bg);
     color:var(--fg);
     font-family:var(--font-body);
@@ -71,6 +77,11 @@
     line-height:1.45;
     -webkit-font-smoothing:antialiased;
     transition:background .2s ease,color .2s ease;
+    /* Respeta el notch/home indicator en iPhone cuando se agrega a pantalla de inicio */
+    padding-left:env(safe-area-inset-left);
+    padding-right:env(safe-area-inset-right);
+    padding-bottom:env(safe-area-inset-bottom);
+    touch-action:manipulation;
   }
 
   a{color:inherit;}
@@ -89,7 +100,7 @@
   .appbar-inner{
     max-width:1180px;
     margin:0 auto;
-    padding:18px 20px 0;
+    padding:calc(18px + env(safe-area-inset-top)) 20px 0;
   }
   .appbar-top{
     display:flex;
@@ -142,7 +153,7 @@
   .ledger-row{
     margin-top:18px;
     display:grid;
-    grid-template-columns:repeat(3,1fr);
+    grid-template-columns:repeat(4,1fr);
     border:1px solid var(--border);
     border-radius:var(--radius);
     overflow:hidden;
@@ -167,7 +178,18 @@
   .ledger-cell.balance .value{color:var(--gold);}
   .ledger-cell.income .value{color:var(--sage);}
   .ledger-cell.expense .value{color:var(--brick);}
+  .ledger-cell.projected .value{color:var(--focus);}
   .appbar-inner > .ledger-row{margin-bottom:18px;}
+
+  @media (max-width:600px){
+    .ledger-row{grid-template-columns:repeat(2,1fr);}
+    .ledger-cell{padding:11px 12px;border-left:1px solid var(--border-soft);}
+    .ledger-cell:nth-child(2n+1){border-left:0;}
+    .ledger-cell:nth-child(n+3){border-top:1px solid var(--border-soft);}
+    .ledger-cell .value{font-size:18px;}
+    .brand .mark{font-size:17px;}
+    .brand .tagline{display:none;}
+  }
 
   /* ============================================================
      LAYOUT
@@ -329,6 +351,133 @@
   }
 
   /* ============================================================
+     METAS, AHORRO Y DEUDAS
+     ============================================================ */
+  .metas-panel{grid-column:1/-1;}
+  .metas-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-bottom:16px;
+  }
+  @media (max-width:760px){
+    .metas-grid{grid-template-columns:1fr;}
+  }
+  .meta-block{
+    border:1px solid var(--border-soft);
+    border-radius:4px;
+    padding:14px;
+    background:var(--panel-2);
+    display:grid;
+    gap:12px;
+  }
+  .meta-block h3{
+    margin:0;
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--fg-faint);
+    font-weight:600;
+  }
+  .meta-two-col{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .progress-track{
+    height:8px;
+    border-radius:999px;
+    background:var(--panel);
+    border:1px solid var(--border-soft);
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    width:0%;
+    background:var(--gold);
+    border-radius:999px;
+    transition:width .3s ease;
+  }
+  .progress-label{
+    font-size:11.5px;
+    color:var(--fg-dim);
+    display:flex;
+    justify-content:space-between;
+  }
+
+  .panel-subhead{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:10px;
+  }
+  .panel-subhead h3{
+    margin:0;
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--fg-faint);
+    font-weight:600;
+  }
+
+  .tarjetas-block{
+    border:1px solid var(--border-soft);
+    border-radius:4px;
+    padding:14px;
+    background:var(--panel-2);
+    margin-bottom:16px;
+  }
+  .tarjeta-row{
+    display:grid;
+    grid-template-columns:1fr 140px 32px;
+    gap:8px;
+    margin-bottom:8px;
+    align-items:center;
+  }
+  @media (max-width:480px){
+    .tarjeta-row{grid-template-columns:1fr 96px 32px;}
+  }
+  .tarjeta-row input{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:4px;
+    color:var(--fg);
+    padding:8px 9px;
+    font-size:13px;
+    width:100%;
+  }
+  .tarjetas-empty{
+    font-size:12px;
+    color:var(--fg-faint);
+    padding:6px 0;
+  }
+
+  .balance-final{
+    border:1px solid var(--border);
+    border-radius:4px;
+    padding:14px 16px;
+  }
+  .balance-final-row{
+    display:flex;
+    justify-content:space-between;
+    padding:6px 0;
+    font-size:13px;
+    color:var(--fg-dim);
+    border-bottom:1px solid var(--border-soft);
+  }
+  .balance-final-row:last-child{border-bottom:0;}
+  .balance-final-row.total{
+    padding-top:10px;
+    margin-top:4px;
+    border-top:1px solid var(--border);
+    border-bottom:0;
+    font-size:16px;
+    font-weight:700;
+    color:var(--fg);
+  }
+  .balance-final-row.total .num{color:var(--gold);}
+
+  /* ============================================================
      HISTORIAL / TABLA
      ============================================================ */
   .history-panel{grid-column:1/-1;}
@@ -408,6 +557,40 @@
   @media (prefers-reduced-motion:reduce){
     *{transition:none !important;}
   }
+
+  /* ============================================================
+     MOBILE / iOS
+     iOS hace zoom automático en inputs con font-size <16px, y los
+     targets táctiles deben rondar 44px para no fallar el tap.
+     ============================================================ */
+  @media (max-width:600px){
+    main{padding:16px 14px 48px;gap:14px;}
+    .panel-body{padding:14px;}
+    .panel-head{padding:11px 14px;}
+
+    .field input,
+    .field select,
+    .field textarea,
+    .filters select{
+      font-size:16px;
+      padding:10px 10px;
+    }
+    .field input,
+    .field select,
+    .field textarea{min-height:44px;}
+
+    .btn{min-height:40px;padding:9px 14px;}
+    .type-switch label{min-height:44px;}
+    .del-btn{min-height:32px;min-width:32px;}
+
+    .history-head-actions{flex-wrap:wrap;row-gap:6px;}
+    .charts-grid{gap:12px;}
+    .chart-box .chart-wrap,
+    .chart-empty{height:190px;}
+
+    thead th,
+    tbody td{padding:8px 8px;}
+  }
 </style>
 </head>
 <body>
@@ -437,6 +620,10 @@
       <div class="ledger-cell expense">
         <div class="label">Gastos</div>
         <div class="value num" id="stat-expense">$0.00</div>
+      </div>
+      <div class="ledger-cell projected">
+        <div class="label">Balance proyectado</div>
+        <div class="value num" id="stat-projected">$0.00</div>
       </div>
     </div>
   </div>
@@ -517,12 +704,93 @@
     </div>
   </section>
 
+  <!-- ===================== METAS, AHORRO Y DEUDAS ===================== -->
+  <section class="panel metas-panel" aria-labelledby="metas-title">
+    <div class="panel-head"><h2 id="metas-title">Metas, ahorro y deudas</h2></div>
+    <div class="panel-body">
+
+      <div class="metas-grid">
+        <!-- Meta de compra: casa, terreno, etc. -->
+        <div class="meta-block">
+          <h3>Meta de compra</h3>
+          <div class="field">
+            <label for="m-nombre">Descripción (ej. casa, terreno)</label>
+            <input type="text" id="m-nombre" placeholder="Terreno en...">
+          </div>
+          <div class="meta-two-col">
+            <div class="field">
+              <label for="m-objetivo">Monto objetivo</label>
+              <input type="number" id="m-objetivo" min="0" step="0.01" placeholder="0.00">
+            </div>
+            <div class="field">
+              <label for="m-ahorrado">Ahorrado para la meta</label>
+              <input type="number" id="m-ahorrado" min="0" step="0.01" placeholder="0.00">
+            </div>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="m-progress-fill"></div></div>
+          <div class="progress-label">
+            <span id="m-progress-pct">0%</span>
+            <span id="m-progress-restante">Falta $0.00</span>
+          </div>
+        </div>
+
+        <!-- Fondo de ahorro, aguinaldo, PTU y deuda general -->
+        <div class="meta-block">
+          <h3>Ahorro y proyecciones</h3>
+          <div class="meta-two-col">
+            <div class="field">
+              <label for="m-fondo">Fondo de ahorro</label>
+              <input type="number" id="m-fondo" min="0" step="0.01" placeholder="0.00">
+            </div>
+            <div class="field">
+              <label for="m-deuda-otras">Deuda general (no tarjetas)</label>
+              <input type="number" id="m-deuda-otras" min="0" step="0.01" placeholder="0.00">
+            </div>
+          </div>
+          <div class="meta-two-col">
+            <div class="field">
+              <label for="m-aguinaldo">Aguinaldo proyectado</label>
+              <input type="number" id="m-aguinaldo" min="0" step="0.01" placeholder="0.00">
+            </div>
+            <div class="field">
+              <label for="m-ptu">PTU proyectado</label>
+              <input type="number" id="m-ptu" min="0" step="0.01" placeholder="0.00">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Deudas en tarjetas de crédito -->
+      <div class="tarjetas-block">
+        <div class="panel-subhead">
+          <h3>Deuda en tarjetas de crédito</h3>
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-add-tarjeta">+ Agregar tarjeta</button>
+        </div>
+        <div id="tarjetas-list"><!-- filas generadas por JS --></div>
+      </div>
+
+      <!-- Balance general proyectado -->
+      <div class="balance-final">
+        <div class="balance-final-row"><span>Saldo por transacciones</span><span class="num" id="bf-saldo">$0.00</span></div>
+        <div class="balance-final-row"><span>+ Fondo de ahorro</span><span class="num" id="bf-fondo">$0.00</span></div>
+        <div class="balance-final-row"><span>+ Aguinaldo proyectado</span><span class="num" id="bf-aguinaldo">$0.00</span></div>
+        <div class="balance-final-row"><span>+ PTU proyectado</span><span class="num" id="bf-ptu">$0.00</span></div>
+        <div class="balance-final-row"><span>− Deuda total (general + tarjetas)</span><span class="num" id="bf-deuda">$0.00</span></div>
+        <div class="balance-final-row total"><span>Balance general proyectado</span><span class="num" id="bf-total">$0.00</span></div>
+      </div>
+
+    </div>
+  </section>
+
   <!-- ===================== HISTORIAL ===================== -->
   <section class="panel history-panel" aria-labelledby="hist-title">
     <div class="panel-head">
       <h2 id="hist-title">Historial de transacciones</h2>
       <div class="history-head-actions">
         <button type="button" class="btn btn-ghost btn-sm" id="btn-export">Exportar CSV</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-export-json">Exportar respaldo</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-import-json">Importar respaldo</button>
+        <input type="file" id="input-import-json" accept="application/json,.json" hidden>
       </div>
     </div>
     <div class="panel-body">
@@ -611,6 +879,45 @@
     }
   }
 
+  // --- Metas, ahorro y deudas (independiente de las transacciones) ---
+  const METAS_KEY = 'libromayor_metas';
+
+  /** @typedef {{nombre:string, objetivo:number, ahorrado:number}} MetaCompra */
+  /** @typedef {{id:string, nombre:string, saldo:number}} Tarjeta */
+  /** @typedef {{meta:MetaCompra, fondoAhorro:number, aguinaldo:number, ptu:number, deudaOtras:number, tarjetas:Tarjeta[]}} EstadoMetas */
+
+  /** @type {EstadoMetas} */
+  let estadoMetas = cargarMetas();
+
+  function metasPorDefecto() {
+    return {
+      meta: { nombre: '', objetivo: 0, ahorrado: 0 },
+      fondoAhorro: 0,
+      aguinaldo: 0,
+      ptu: 0,
+      deudaOtras: 0,
+      tarjetas: []
+    };
+  }
+
+  function cargarMetas() {
+    try {
+      const raw = localStorage.getItem(METAS_KEY);
+      return raw ? Object.assign(metasPorDefecto(), JSON.parse(raw)) : metasPorDefecto();
+    } catch (e) {
+      console.error('No se pudo leer metas de localStorage:', e);
+      return metasPorDefecto();
+    }
+  }
+
+  function guardarMetas() {
+    try {
+      localStorage.setItem(METAS_KEY, JSON.stringify(estadoMetas));
+    } catch (e) {
+      console.error('No se pudo escribir metas en localStorage:', e);
+    }
+  }
+
   // -----------------------------------------------------------
   // 2. UTILIDADES
   // -----------------------------------------------------------
@@ -658,11 +965,35 @@
     statBalance: document.getElementById('stat-balance'),
     statIncome: document.getElementById('stat-income'),
     statExpense: document.getElementById('stat-expense'),
+    statProjected: document.getElementById('stat-projected'),
     tbody: document.getElementById('tx-tbody'),
     filterPeriodo: document.getElementById('filter-periodo'),
     filterCategoria: document.getElementById('filter-categoria'),
     btnClearFilters: document.getElementById('btn-clear-filters'),
     btnExport: document.getElementById('btn-export'),
+    btnExportJSON: document.getElementById('btn-export-json'),
+    btnImportJSON: document.getElementById('btn-import-json'),
+    inputImportJSON: document.getElementById('input-import-json'),
+
+    // Metas, ahorro y deudas
+    mNombre: document.getElementById('m-nombre'),
+    mObjetivo: document.getElementById('m-objetivo'),
+    mAhorrado: document.getElementById('m-ahorrado'),
+    mProgressFill: document.getElementById('m-progress-fill'),
+    mProgressPct: document.getElementById('m-progress-pct'),
+    mProgressRestante: document.getElementById('m-progress-restante'),
+    mFondo: document.getElementById('m-fondo'),
+    mDeudaOtras: document.getElementById('m-deuda-otras'),
+    mAguinaldo: document.getElementById('m-aguinaldo'),
+    mPtu: document.getElementById('m-ptu'),
+    tarjetasList: document.getElementById('tarjetas-list'),
+    btnAddTarjeta: document.getElementById('btn-add-tarjeta'),
+    bfSaldo: document.getElementById('bf-saldo'),
+    bfFondo: document.getElementById('bf-fondo'),
+    bfAguinaldo: document.getElementById('bf-aguinaldo'),
+    bfPtu: document.getElementById('bf-ptu'),
+    bfDeuda: document.getElementById('bf-deuda'),
+    bfTotal: document.getElementById('bf-total'),
   };
 
   /** Aplica los filtros activos y devuelve la lista resultante, más reciente primero */
@@ -682,6 +1013,60 @@
     el.statIncome.textContent = formatearMonto(ingresos);
     el.statExpense.textContent = formatearMonto(gastos);
     el.statBalance.textContent = formatearMonto(ingresos - gastos);
+    renderBalanceFinal(ingresos - gastos);
+  }
+
+  /** Dibuja las filas de tarjetas de crédito a partir de estadoMetas.tarjetas */
+  function renderTarjetas() {
+    if (estadoMetas.tarjetas.length === 0) {
+      el.tarjetasList.innerHTML = '<div class="tarjetas-empty">Sin tarjetas registradas. Agrega una para incluir su saldo en el balance.</div>';
+      return;
+    }
+    el.tarjetasList.innerHTML = estadoMetas.tarjetas.map(t => `
+      <div class="tarjeta-row" data-id="${t.id}">
+        <input type="text" class="tarjeta-nombre" placeholder="Ej. BBVA Oro" value="${escapeAttr(t.nombre)}">
+        <input type="number" class="tarjeta-saldo" min="0" step="0.01" placeholder="0.00" value="${t.saldo || ''}">
+        <button type="button" class="del-btn" data-del-tarjeta="${t.id}" title="Eliminar tarjeta" aria-label="Eliminar tarjeta">✕</button>
+      </div>
+    `).join('');
+  }
+
+  function escapeAttr(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML.replace(/"/g, '&quot;');
+  }
+
+  /** Recalcula el bloque de progreso de la meta y el balance general proyectado */
+  function renderBalanceFinal(saldoTransacciones) {
+    const objetivo = parseFloat(el.mObjetivo.value) || 0;
+    const ahorrado = parseFloat(el.mAhorrado.value) || 0;
+    const fondo = parseFloat(el.mFondo.value) || 0;
+    const aguinaldo = parseFloat(el.mAguinaldo.value) || 0;
+    const ptu = parseFloat(el.mPtu.value) || 0;
+    const deudaOtras = parseFloat(el.mDeudaOtras.value) || 0;
+
+    const sumaTarjetas = estadoMetas.tarjetas.reduce((s, t) => s + (parseFloat(t.saldo) || 0), 0);
+    const deudaTotal = deudaOtras + sumaTarjetas;
+
+    // Progreso de la meta de compra
+    const pct = objetivo > 0 ? Math.min(100, Math.round((ahorrado / objetivo) * 100)) : 0;
+    el.mProgressFill.style.width = pct + '%';
+    el.mProgressPct.textContent = pct + '%';
+    el.mProgressRestante.textContent = objetivo > 0
+      ? `Falta ${formatearMonto(Math.max(0, objetivo - ahorrado))}`
+      : 'Define un monto objetivo';
+
+    // Balance general proyectado: saldo actual + colchones - deudas
+    const balanceFinal = saldoTransacciones + fondo + aguinaldo + ptu - deudaTotal;
+
+    el.bfSaldo.textContent = formatearMonto(saldoTransacciones);
+    el.bfFondo.textContent = formatearMonto(fondo);
+    el.bfAguinaldo.textContent = formatearMonto(aguinaldo);
+    el.bfPtu.textContent = formatearMonto(ptu);
+    el.bfDeuda.textContent = '-' + formatearMonto(deudaTotal);
+    el.bfTotal.textContent = formatearMonto(balanceFinal);
+    el.statProjected.textContent = formatearMonto(balanceFinal);
   }
 
   function renderOpcionesPeriodo() {
@@ -950,6 +1335,185 @@
     URL.revokeObjectURL(url);
   });
 
+  // --- Metas, ahorro y deudas: guardar en cada cambio y recalcular ---
+  function guardarCamposMeta() {
+    estadoMetas.meta.nombre = el.mNombre.value.trim();
+    estadoMetas.meta.objetivo = parseFloat(el.mObjetivo.value) || 0;
+    estadoMetas.meta.ahorrado = parseFloat(el.mAhorrado.value) || 0;
+    estadoMetas.fondoAhorro = parseFloat(el.mFondo.value) || 0;
+    estadoMetas.deudaOtras = parseFloat(el.mDeudaOtras.value) || 0;
+    estadoMetas.aguinaldo = parseFloat(el.mAguinaldo.value) || 0;
+    estadoMetas.ptu = parseFloat(el.mPtu.value) || 0;
+    guardarMetas();
+    renderResumen();
+  }
+
+  [el.mNombre, el.mObjetivo, el.mAhorrado, el.mFondo, el.mDeudaOtras, el.mAguinaldo, el.mPtu]
+    .forEach(input => input.addEventListener('input', guardarCamposMeta));
+
+  // --- Tarjetas de crédito: agregar, editar y eliminar ---
+  el.btnAddTarjeta.addEventListener('click', () => {
+    estadoMetas.tarjetas.push({ id: idUnico(), nombre: '', saldo: 0 });
+    guardarMetas();
+    renderTarjetas();
+    renderResumen();
+    // Enfoca el nombre de la tarjeta recién creada para captura rápida
+    const filas = el.tarjetasList.querySelectorAll('.tarjeta-nombre');
+    if (filas.length) filas[filas.length - 1].focus();
+  });
+
+  // Delegación de eventos: edición de nombre/saldo y borrado de tarjetas
+  el.tarjetasList.addEventListener('input', (e) => {
+    const fila = e.target.closest('.tarjeta-row');
+    if (!fila) return;
+    const id = fila.getAttribute('data-id');
+    const tarjeta = estadoMetas.tarjetas.find(t => t.id === id);
+    if (!tarjeta) return;
+
+    if (e.target.classList.contains('tarjeta-nombre')) {
+      tarjeta.nombre = e.target.value;
+    } else if (e.target.classList.contains('tarjeta-saldo')) {
+      tarjeta.saldo = parseFloat(e.target.value) || 0;
+    }
+    guardarMetas();
+    renderResumen(); // recalcula el balance final sin redibujar la lista (evita perder el foco)
+  });
+
+  el.tarjetasList.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-del-tarjeta]');
+    if (!btn) return;
+    const id = btn.getAttribute('data-del-tarjeta');
+    estadoMetas.tarjetas = estadoMetas.tarjetas.filter(t => t.id !== id);
+    guardarMetas();
+    renderTarjetas();
+    renderResumen();
+  });
+
+  // --- Exportar respaldo completo (JSON) ---
+  // A diferencia del CSV (pensado para leer en Excel), este respaldo guarda
+  // TODAS las transacciones sin filtrar, en un formato que la propia app
+  // puede volver a leer con "Importar respaldo".
+  el.btnExportJSON.addEventListener('click', () => {
+    const hayMetas = estadoMetas.meta.objetivo > 0 || estadoMetas.fondoAhorro > 0
+      || estadoMetas.aguinaldo > 0 || estadoMetas.ptu > 0 || estadoMetas.deudaOtras > 0
+      || estadoMetas.tarjetas.length > 0;
+    if (transacciones.length === 0 && !hayMetas) {
+      alert('Todavía no hay datos para respaldar.');
+      return;
+    }
+
+    const respaldo = {
+      app: 'LibroMayor',
+      version: 2,
+      exportadoEl: new Date().toISOString(),
+      transacciones,
+      metas: estadoMetas
+    };
+
+    const blob = new Blob([JSON.stringify(respaldo, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const hoy = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `respaldo_libromayor_${hoy}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  // --- Importar respaldo (JSON) ---
+  el.btnImportJSON.addEventListener('click', () => {
+    el.inputImportJSON.value = ''; // permite reimportar el mismo archivo dos veces seguidas
+    el.inputImportJSON.click();
+  });
+
+  el.inputImportJSON.addEventListener('change', (e) => {
+    const archivo = e.target.files[0];
+    if (!archivo) return;
+
+    const lector = new FileReader();
+    lector.onload = () => {
+      let datos;
+      try {
+        datos = JSON.parse(lector.result);
+      } catch (err) {
+        alert('El archivo no es un JSON válido.');
+        return;
+      }
+
+      // Acepta tanto el formato de respaldo ({transacciones:[...]}) como un arreglo suelto
+      const importadas = Array.isArray(datos) ? datos : datos.transacciones;
+
+      if (!Array.isArray(importadas) || importadas.length === 0) {
+        alert('El archivo no contiene transacciones reconocibles.');
+        return;
+      }
+
+      const validas = importadas.filter(esTransaccionValida);
+      if (validas.length === 0) {
+        alert('Ninguna de las transacciones del archivo tiene un formato válido.');
+        return;
+      }
+      if (validas.length < importadas.length) {
+        alert(`Aviso: ${importadas.length - validas.length} registro(s) se ignoraron por tener un formato inválido.`);
+      }
+
+      // Pregunta si combinar con lo existente o reemplazar todo
+      const combinar = confirm(
+        `Se encontraron ${validas.length} transacción(es) en el respaldo.\n\n` +
+        'Aceptar = combinar con tus transacciones actuales.\n' +
+        'Cancelar = reemplazar todas tus transacciones actuales por las del respaldo.'
+      );
+
+      // Reasigna IDs nuevos para evitar choques con las transacciones existentes
+      const normalizadas = validas.map(t => ({
+        id: idUnico(),
+        fecha: t.fecha,
+        tipo: t.tipo,
+        monto: Math.round(parseFloat(t.monto) * 100) / 100,
+        categoria: t.categoria,
+        metodo: t.metodo,
+        concepto: t.concepto || ''
+      }));
+
+      transacciones = combinar ? transacciones.concat(normalizadas) : normalizadas;
+      guardarTransacciones();
+
+      // Si el respaldo trae metas/deudas, se restauran también (siempre reemplazan, no se combinan campo a campo)
+      if (datos && typeof datos === 'object' && datos.metas && typeof datos.metas === 'object') {
+        estadoMetas = Object.assign(metasPorDefecto(), datos.metas);
+        estadoMetas.meta = Object.assign({ nombre: '', objetivo: 0, ahorrado: 0 }, estadoMetas.meta || {});
+        estadoMetas.tarjetas = Array.isArray(estadoMetas.tarjetas) ? estadoMetas.tarjetas : [];
+        guardarMetas();
+
+        el.mNombre.value = estadoMetas.meta.nombre || '';
+        el.mObjetivo.value = estadoMetas.meta.objetivo || '';
+        el.mAhorrado.value = estadoMetas.meta.ahorrado || '';
+        el.mFondo.value = estadoMetas.fondoAhorro || '';
+        el.mDeudaOtras.value = estadoMetas.deudaOtras || '';
+        el.mAguinaldo.value = estadoMetas.aguinaldo || '';
+        el.mPtu.value = estadoMetas.ptu || '';
+        renderTarjetas();
+      }
+
+      renderTodo();
+      alert('Respaldo importado correctamente.');
+    };
+    lector.onerror = () => alert('No se pudo leer el archivo.');
+    lector.readAsText(archivo);
+  });
+
+  /** Valida que un objeto importado tenga la forma mínima de una transacción */
+  function esTransaccionValida(t) {
+    return t && typeof t === 'object'
+      && typeof t.fecha === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(t.fecha)
+      && (t.tipo === 'ingreso' || t.tipo === 'gasto')
+      && !isNaN(parseFloat(t.monto)) && parseFloat(t.monto) > 0
+      && typeof t.categoria === 'string'
+      && typeof t.metodo === 'string';
+  }
+
   // --- Tema oscuro / claro ---
   const btnDark = document.getElementById('btn-theme-dark');
   const btnLight = document.getElementById('btn-theme-light');
@@ -979,6 +1543,16 @@
 
     // Fecha de hoy por defecto en el formulario
     el.fecha.value = new Date().toISOString().slice(0, 10);
+
+    // Precarga los campos de metas/ahorro/deudas guardados previamente
+    el.mNombre.value = estadoMetas.meta.nombre || '';
+    el.mObjetivo.value = estadoMetas.meta.objetivo || '';
+    el.mAhorrado.value = estadoMetas.meta.ahorrado || '';
+    el.mFondo.value = estadoMetas.fondoAhorro || '';
+    el.mDeudaOtras.value = estadoMetas.deudaOtras || '';
+    el.mAguinaldo.value = estadoMetas.aguinaldo || '';
+    el.mPtu.value = estadoMetas.ptu || '';
+    renderTarjetas();
 
     renderTodo();
   })();
