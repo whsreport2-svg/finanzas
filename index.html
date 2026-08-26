@@ -26,8 +26,6 @@
       --lav-lt:    #EDE9F8;
       --sky:       #7BBFD4;
       --sky-lt:    #E2F3F9;
-      --queso:     #E8C46A;
-      --zarza:     #B8A4D8;
       --text-1:    #3A2840;
       --text-2:    #8A6880;
       --text-3:    #C8A8BC;
@@ -519,8 +517,6 @@
       font-size: 12px; font-weight: 800;
       padding: 5px 12px; border-radius: 30px;
     }
-    .fl-badge.queso    { background: #FDF0CC; color: #9A7020; }
-    .fl-badge.zarzamora { background: #EDE8FA; color: #6B55A0; }
 
     .card-status {
       display: flex; align-items: center;
@@ -723,8 +719,6 @@
       height: 100%; border-radius: 30px;
       transition: width 0.8s cubic-bezier(0.22,1,0.36,1);
     }
-    .bar-fill.q { background: linear-gradient(90deg, #F2C57C, #E8A84A); }
-    .bar-fill.z { background: linear-gradient(90deg, #C4B4E8, #A89BD4); }
 
     .fl-bar-num {
       font-size: 15px; font-weight: 900;
@@ -1272,8 +1266,8 @@
         <div class="err-msg" id="errDepto">🏢 Selecciona su departamento</div>
 
         <div class="flavors-head">
-          <span class="flavors-head-lbl">🍰 Sabores</span>
-          <button class="btn-add-fl" id="btnAddFlavor">+ Agregar sabor</button>
+          <span class="flavors-head-lbl">📦 Productos</span>
+          <button class="btn-add-fl" id="btnAddFlavor">+ Agregar producto</button>
         </div>
         <div id="flavorRows"></div>
       </div>
@@ -1282,7 +1276,7 @@
         <div class="strip-left">
           <div class="strip-lbl">Total del pedido</div>
           <div class="strip-num" id="stripTotal">0</div>
-          <div class="strip-unit">pays 🥧</div>
+          <div class="strip-unit">productos 📦</div>
           <div class="strip-price" id="stripPrice">$0 MXN</div>
         </div>
         <div class="strip-pills" id="stripPills"></div>
@@ -1391,7 +1385,7 @@
       <div class="revenue-card">
         <div class="rev-label" id="revLabel">💵 Recaudación total</div>
         <div class="rev-amount"><span>$</span><span id="revTotal">0</span></div>
-        <div class="rev-sub" id="revSub">0 pays</div>
+        <div class="rev-sub" id="revSub">0 productos</div>
         <div class="rev-breakdown">
           <div class="rev-chip">
             <div class="rev-chip-lbl">Cobrado</div>
@@ -1424,9 +1418,9 @@
 
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-icon">🥧</div>
+          <div class="stat-icon">📦</div>
           <div class="stat-val" id="statPays">0</div>
-          <div class="stat-lbl">Pays totales</div>
+          <div class="stat-lbl">Productos totales</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon">📋</div>
@@ -1446,15 +1440,15 @@
         <div class="stat-card pink-card wide">
           <div class="stat-icon">📊</div>
           <div class="stat-val" id="statAvg">0</div>
-          <div class="stat-lbl">Promedio pays por pedido</div>
+          <div class="stat-lbl">Promedio productos por pedido</div>
         </div>
       </div>
 
-      <div class="sec-head"><h2>Por sabor</h2></div>
+      <div class="sec-head"><h2>Por producto</h2></div>
       <div class="flavor-bars" id="flavorBarsContainer"></div>
 
       <div class="chart-card">
-        <div class="chart-title">🍰 Distribución de sabores</div>
+        <div class="chart-title">📦 Distribución de productos</div>
         <div class="chart-container">
           <canvas id="chartFlavors"></canvas>
         </div>
@@ -1462,7 +1456,7 @@
 
       <div class="sec-head"><h2>Por departamento</h2></div>
       <div class="chart-card">
-        <div class="chart-title">🏢 Pays por área</div>
+        <div class="chart-title">🏢 Productos por área</div>
         <div class="chart-container-lg">
           <canvas id="chartDept"></canvas>
         </div>
@@ -1486,13 +1480,13 @@
       <div class="cfg-card">
         <div class="cfg-card-head">
           <div>
-            <div class="cfg-card-title">🍰 Sabores / Productos</div>
+            <div class="cfg-card-title">📦 Productos</div>
             <div class="cfg-card-sub">Se reflejan al instante en el formulario de pedidos</div>
           </div>
         </div>
         <div id="cfgProductList"></div>
-        <div class="cfg-add-row"><button class="cfg-add-btn" id="btnCfgAddProduct">+ Agregar sabor</button></div>
-        <div class="cfg-save-bar"><button class="cfg-save-btn" id="btnCfgSaveProducts">Guardar sabores</button></div>
+        <div class="cfg-add-row"><button class="cfg-add-btn" id="btnCfgAddProduct">+ Agregar producto</button></div>
+        <div class="cfg-save-bar"><button class="cfg-save-btn" id="btnCfgSaveProducts">Guardar productos</button></div>
       </div>
 
       <div class="cfg-card">
@@ -1508,7 +1502,7 @@
       </div>
 
       <div class="cfg-card">
-        <div class="cfg-card-head"><div class="cfg-card-title">💲 Precio por pay (MXN)</div></div>
+        <div class="cfg-card-head"><div class="cfg-card-title">💲 Precio por producto (MXN)</div></div>
         <div class="cfg-row"><span class="fi">$</span><input type="number" id="cfgPrecio" min="1" step="1"></div>
         <div class="cfg-save-bar"><button class="cfg-save-btn" id="btnCfgSavePrecio">Guardar precio</button></div>
       </div>
@@ -1863,7 +1857,7 @@ document.getElementById('btnAdminLogout').addEventListener('click', async () => 
 ══════════════════════════════════════════════ */
 function buildFlavorOptionsHTML(selectedId) {
   return CONFIG.productos.map(p =>
-    `<option value="${esc(p.id)}" ${p.id===selectedId?'selected':''}>${p.emoji} ${esc(p.nombre)}</option>`
+    `<option value="${esc(p.id)}" ${p.id===selectedId?'selected':''}>${esc(p.nombre)}</option>`
   ).join('');
 }
 
@@ -1884,7 +1878,11 @@ function rebuildFlavorSelects() {
 }
 
 function addFlavorRow(tipo, qty=1) {
-  if (!tipo) tipo = CONFIG.productos[0]?.id || 'queso';
+  // Buscar "queso" como primer producto por defecto
+  if (!tipo) {
+    const queso = CONFIG.productos.find(p => p.id === 'queso');
+    tipo = queso ? queso.id : (CONFIG.productos[0]?.id || '');
+  }
   const id = ++fid;
   const wrap = document.getElementById('flavorRows');
   const div = document.createElement('div');
@@ -1919,7 +1917,7 @@ function addFlavorRow(tipo, qty=1) {
   mn.addEventListener('click', () => {
     const v = parseInt(inp.value)||1;
     if(v>1) { inp.value=v-1; updateStrip(); }
-    else toast('¡Ya está en 1! El mínimo es 1 pay 😊','warning',1800);
+    else toast('¡Ya está en 1! El mínimo es 1 producto 😊','warning',1800);
   });
   pl.addEventListener('click', () => {
     const v = parseInt(inp.value)||1;
@@ -1928,7 +1926,7 @@ function addFlavorRow(tipo, qty=1) {
   });
   rm.addEventListener('click', () => {
     if(document.querySelectorAll('.flavor-card').length<=1) {
-      toast('¡Necesitas al menos un sabor! 🍰','warning');
+      toast('¡Necesitas al menos un producto! 📦','warning');
       return;
     }
     div.style.opacity='0'; div.style.transform='translateX(20px)';
@@ -1987,11 +1985,11 @@ function validate() {
   else fieldOk('rowNombre','errNombre');
   if(!depto) { fieldErr('rowDepto','errDepto'); ok=false; }
   else fieldOk('rowDepto','errDepto');
-  if(getFlavorData().reduce((s,f)=>s+f.cantidad,0)===0) { toast('¡Agrega al menos 1 pay! 🥧','warning'); ok=false; }
+  if(getFlavorData().reduce((s,f)=>s+f.cantidad,0)===0) { toast('¡Agrega al menos 1 producto! 📦','warning'); ok=false; }
   return ok;
 }
 
-// Envío del pedido — 🔥 CORRECCIÓN: El pedido se guarda en Firebase y el admin lo verá en tiempo real
+// Envío del pedido
 document.getElementById('btnSubmit').addEventListener('click', () => {
   if(!validate()) return;
 
@@ -2000,11 +1998,21 @@ document.getElementById('btnSubmit').addEventListener('click', () => {
   const flavors = getFlavorData();
   const total   = flavors.reduce((s,f)=>s+f.cantidad, 0);
 
-  // 🔥 Guardar en Firebase
+  // Guardar con nombre del producto para mostrar correctamente
+  const flavorsConNombre = flavors.map(f => {
+    const producto = productById(f.tipo);
+    return {
+      tipo: f.tipo,
+      nombre: producto.nombre,
+      emoji: producto.emoji,
+      cantidad: f.cantidad
+    };
+  });
+
   ordersRef.push({ 
     nombre, 
     depto, 
-    flavors, 
+    flavors: flavorsConNombre,
     total, 
     ts: Date.now(), 
     delivered: false, 
@@ -2026,7 +2034,7 @@ document.getElementById('btnSubmit').addEventListener('click', () => {
       const p = productById(id);
       return `<div class="confirm-summary-row"><span>${p.emoji} ${esc(p.nombre)}</span><strong>${qty}</strong></div>`;
     }).join('')}
-    <div class="confirm-summary-row"><span>Total</span><strong>${total} pay${total!==1?'s':''} · $${total*CONFIG.precio} MXN</strong></div>
+    <div class="confirm-summary-row"><span>Total</span><strong>${total} producto${total!==1?'s':''} · $${total*CONFIG.precio} MXN</strong></div>
   `;
 
   // Reset formulario
@@ -2059,7 +2067,7 @@ function initAdminOnce() {
   if (adminInited) return;
   adminInited = true;
 
-  // 🔥 LISTENER EN TIEMPO REAL — esto es lo que sincroniza los pedidos
+  // Listener en tiempo real
   ordersRef.on('value', snap => {
     orders = [];
     orderKeys = [];
@@ -2193,7 +2201,7 @@ function setupAdminListeners() {
       const rows = [[
         'Nombre','Departamento',
         ...prodCols.map(p=>`${p.nombre} (cant.)`),
-        'Total Pays','Total $MXN','Entregado','Pagado','Fecha'
+        'Total Productos','Total $MXN','Entregado','Pagado','Fecha'
       ]];
       orders.forEach(o => {
         const qtys = prodCols.map(p => o.flavors.filter(f=>f.tipo===p.id).reduce((s,f)=>s+f.cantidad,0));
@@ -2277,7 +2285,7 @@ function renderOrders() {
 
   if(orders.length === 0) {
     list.innerHTML = `<li><div class="empty-state">
-      <div class="empty-emoji">🥧</div>
+      <div class="empty-emoji">📦</div>
       <div class="empty-title">¡Sin pedidos todavía!</div>
       <div class="empty-sub">Comparte el enlace del formulario y verás los pedidos aquí al instante 🌸</div>
     </div></li>`;
@@ -2299,6 +2307,13 @@ function renderOrders() {
     const cardClass = ['order-card', o.delivered?'delivered':'', o.paid?'paid':''].join(' ').trim();
     const priceMXN = `$${o.total * CONFIG.precio}`;
 
+    const cardFlavors = o.flavors.map(f => {
+      const nombreSabor = f.nombre || productById(f.tipo).nombre;
+      const emojiSabor = f.emoji || productById(f.tipo).emoji;
+      const pal = paletteFor(f.tipo);
+      return `<span class="fl-badge pal-${pal}">${emojiSabor} ${nombreSabor} · ${f.cantidad}</span>`;
+    }).join('');
+
     return `
     <li>
       <div class="${cardClass}" id="card-${i}">
@@ -2313,11 +2328,7 @@ function renderOrders() {
           <span class="card-dept">${esc(o.depto)}</span>
         </div>
         <div class="card-flavors">
-          ${o.flavors.map(f=>{
-            const p = productById(f.tipo);
-            const pal = paletteFor(f.tipo);
-            return `<span class="fl-badge pal-${pal}">${p.emoji} ${esc(p.nombre)} · ${f.cantidad}</span>`;
-          }).join('')}
+          ${cardFlavors}
         </div>
         <div class="card-status">
           <button class="status-toggle ${dClass}" onclick="window.toggleStatus(${i},'delivered')" aria-label="Marcar entregado">
@@ -2330,7 +2341,7 @@ function renderOrders() {
           </button>
         </div>
         <div class="card-footer">
-          <span class="card-total"><strong>${o.total}</strong> ${o.total===1?'pay':'pays'}</span>
+          <span class="card-total"><strong>${o.total}</strong> ${o.total===1?'producto':'productos'}</span>
           <span class="card-price-tag">${priceMXN} MXN</span>
           <button class="del-btn" onclick="window.deleteOrder(${i})" aria-label="Eliminar">✕</button>
         </div>
@@ -2361,7 +2372,7 @@ window.toggleStatus = function(i, field) {
 window.deleteOrder = async function(i) {
   const o = orders[i];
   const ok = await confirmSheet('🗑️','¿Eliminar este pedido?',
-    `Se quitará el pedido de ${o.nombre} — ${o.total} ${o.total===1?'pay':'pays'}.`);
+    `Se quitará el pedido de ${o.nombre} — ${o.total} ${o.total===1?'producto':'productos'}.`);
   if(!ok) return;
   const key = orderKeys[i];
   if(key) db.ref(`pedidos/${key}`).remove().catch(() => toast('❌ Error al eliminar','error'));
@@ -2386,7 +2397,7 @@ function buildCharts(prodLabels, prodData, prodColors, prodBorders, deptData, de
       responsive: true, maintainAspectRatio: false,
       plugins: {
         legend: { position: 'bottom', labels: { padding: 16, font: { size: 13, weight: '800' } } },
-        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} pays ($${ctx.parsed * CONFIG.precio} MXN)` } }
+        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} productos ($${ctx.parsed * CONFIG.precio} MXN)` } }
       },
       cutout: '60%',
       animation: { animateRotate: true, duration: 700 }
@@ -2399,10 +2410,10 @@ function buildCharts(prodLabels, prodData, prodColors, prodBorders, deptData, de
   const dVals   = deptData.map(d=>d[1]);
   chartDept = new Chart(ctxD, {
     type: 'bar',
-    data: { labels: dLabels.length?dLabels:['Sin datos'], datasets: [{ label:'Pays', data: dVals.length?dVals:[0], backgroundColor:'rgba(212,130,156,0.7)', borderColor:'#D4829C', borderWidth:2, borderRadius:8, hoverBackgroundColor:'#D4829C' }] },
+    data: { labels: dLabels.length?dLabels:['Sin datos'], datasets: [{ label:'Productos', data: dVals.length?dVals:[0], backgroundColor:'rgba(212,130,156,0.7)', borderColor:'#D4829C', borderWidth:2, borderRadius:8, hoverBackgroundColor:'#D4829C' }] },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend:{display:false}, tooltip:{ callbacks: { label: ctx => ` ${ctx.parsed.y} pays — $${ctx.parsed.y * CONFIG.precio} MXN` } } },
+      plugins: { legend:{display:false}, tooltip:{ callbacks: { label: ctx => ` ${ctx.parsed.y} productos — $${ctx.parsed.y * CONFIG.precio} MXN` } } },
       scales: { y:{ beginAtZero:true, ticks:{ stepSize:1, font:{size:11,weight:'700'} }, grid:{ color:'rgba(242,228,239,0.6)' } }, x:{ ticks:{ font:{size:11,weight:'800'} }, grid:{ display:false } } },
       animation: { duration: 600 }
     }
@@ -2441,7 +2452,7 @@ function renderResumen() {
 
   document.getElementById('revLabel').textContent    = `💵 Recaudación total a $${CONFIG.precio}`;
   document.getElementById('revTotal').textContent    = totalMXN.toLocaleString('es-MX');
-  document.getElementById('revSub').textContent      = `${total} pay${total!==1?'s':''} × $${CONFIG.precio} MXN`;
+  document.getElementById('revSub').textContent      = `${total} producto${total!==1?'s':''} × $${CONFIG.precio} MXN`;
   document.getElementById('revCobrado').textContent  = `$${paidMXN.toLocaleString('es-MX')}`;
   document.getElementById('revPorCobrar').textContent = `$${pendMXN.toLocaleString('es-MX')}`;
   document.getElementById('revPrecio').textContent   = `$${CONFIG.precio}`;
@@ -2455,7 +2466,7 @@ function renderResumen() {
   document.getElementById('pendPayment').textContent   = pendPay;
 
   // Por producto
-  const prodQty = CONFIG.productos.map(p => orders.reduce((s,o)=>s+o.flavors.filter(f=>f.tipo===p.id).reduce((a,f)=>a+f.cantidad,0),0));
+  const prodQty = CONFIG.productos.map(p => orders.reduce((s,o)=>s+o.flavors.filter(f=>f.tipo===p.id || f.nombre===p.nombre).reduce((a,f)=>a+f.cantidad,0),0));
   const maxQty  = Math.max(...prodQty, 1);
   const barsWrap = document.getElementById('flavorBarsContainer');
   barsWrap.innerHTML = CONFIG.productos.map((p,idx) => `
@@ -2463,7 +2474,7 @@ function renderResumen() {
       <span class="fl-bar-lbl">${p.emoji} ${esc(p.nombre)}</span>
       <div class="bar-track"><div class="bar-fill pal-${idx%6}" style="width:${(prodQty[idx]/maxQty)*100}%"></div></div>
       <span class="fl-bar-num">${prodQty[idx]}</span>
-    </div>`).join('') || '<div style="text-align:center;color:var(--text-3);font-weight:600;font-size:13px">Sin sabores configurados</div>';
+    </div>`).join('') || '<div style="text-align:center;color:var(--text-3);font-weight:600;font-size:13px">Sin productos configurados</div>';
 
   // Dept
   const dmap = {};
@@ -2476,7 +2487,7 @@ function renderResumen() {
         <div class="dept-row">
           <span class="dept-name">${esc(n)}</span>
           <span class="dept-revenue">$${(c*CONFIG.precio).toLocaleString('es-MX')}</span>
-          <span class="dept-count">${c} ${c===1?'pay':'pays'}</span>
+          <span class="dept-count">${c} ${c===1?'producto':'productos'}</span>
         </div>`).join('');
 
   const prodLabels = CONFIG.productos.map(p=>`${p.emoji} ${p.nombre}`);
@@ -2510,9 +2521,9 @@ function renderProductEditor() {
   wrap.innerHTML = editProducts.map((p,idx) => `
     <div class="cfg-row" data-idx="${idx}">
       <input type="text" class="cfg-emoji-input cfg-p-emoji" value="${esc(p.emoji)}" maxlength="4">
-      <input type="text" class="cfg-p-nombre" value="${esc(p.nombre)}" placeholder="Nombre del sabor">
+      <input type="text" class="cfg-p-nombre" value="${esc(p.nombre)}" placeholder="Nombre del producto">
       <button class="cfg-chip-del cfg-p-del" aria-label="Quitar">✕</button>
-    </div>`).join('') || '<div class="cfg-hint">Sin sabores — agrega al menos uno.</div>';
+    </div>`).join('') || '<div class="cfg-hint">Sin productos — agrega al menos uno.</div>';
 
   wrap.querySelectorAll('.cfg-row').forEach(row => {
     const idx = parseInt(row.dataset.idx);
@@ -2524,7 +2535,7 @@ function renderProductEditor() {
     if (nombreInput) nombreInput.addEventListener('input', e => { if (editProducts[idx]) editProducts[idx].nombre = e.target.value; });
     if (delBtn) {
       delBtn.addEventListener('click', () => {
-        if (editProducts.length <= 1) { toast('¡Necesitas al menos un sabor! 🍰','warning'); return; }
+        if (editProducts.length <= 1) { toast('¡Necesitas al menos un producto! 📦','warning'); return; }
         editProducts.splice(idx,1);
         renderProductEditor();
       });
@@ -2534,17 +2545,17 @@ function renderProductEditor() {
 
 document.getElementById('btnCfgAddProduct').addEventListener('click', () => {
   const id = 'p' + Date.now().toString(36);
-  editProducts.push({ id, nombre:'Nuevo sabor', emoji:'🍰' });
+  editProducts.push({ id, nombre:'Nuevo producto', emoji:'📦' });
   renderProductEditor();
 });
 
 document.getElementById('btnCfgSaveProducts').addEventListener('click', () => {
   const cleaned = editProducts
-    .map(p => ({ id: p.id, nombre: (p.nombre||'').trim() || 'Sabor', emoji: (p.emoji||'🍰').trim() || '🍰' }));
-  if (!cleaned.length) { toast('Agrega al menos un sabor 🍰','warning'); return; }
+    .map(p => ({ id: p.id, nombre: (p.nombre||'').trim() || 'Producto', emoji: (p.emoji||'📦').trim() || '📦' }));
+  if (!cleaned.length) { toast('Agrega al menos un producto 📦','warning'); return; }
   configRef.child('productos').set(cleaned)
-    .then(()=>toast('✅ Sabores guardados','success'))
-    .catch(()=>toast('❌ Error al guardar sabores','error'));
+    .then(()=>toast('✅ Productos guardados','success'))
+    .catch(()=>toast('❌ Error al guardar productos','error'));
 });
 
 function renderDeptEditor() {
