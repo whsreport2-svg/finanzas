@@ -124,7 +124,6 @@
       color: var(--text-3);
     }
 
-    /* PAGE 1: NUEVO PEDIDO */
     .welcome-card {
       margin: 12px 16px;
       background: linear-gradient(135deg, #F7D4E4 0%, #E4D4F5 60%, #D4EAF7 100%);
@@ -355,7 +354,6 @@
     }
     .submit-btn:active { transform: scale(0.97); box-shadow: 0 5px 14px rgba(212,130,156,0.3); }
 
-    /* PAGE 2: PEDIDOS */
     .search-bar-wrap {
       padding: 0 16px 12px;
     }
@@ -600,7 +598,6 @@
     .empty-title { font-size: 18px; font-weight: 900; color: var(--text-2); margin-bottom: 6px; }
     .empty-sub   { font-size: 14px; font-weight: 600; color: var(--text-3); line-height: 1.5; }
 
-    /* PAGE 3: RESUMEN */
     .stats-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -806,7 +803,6 @@
     .pend-chip.delivery .pend-chip-lbl { color: #4A9A6A; }
     .pend-chip.payment  .pend-chip-lbl { color: #B8780A; }
 
-    /* TAB BAR */
     .tab-bar {
       position: fixed; bottom: 0; left: 0; right: 0;
       height: calc(var(--tab-h) + var(--safe-b));
@@ -848,7 +844,6 @@
     }
     .tab.active .tab-lbl { color: var(--accent); }
 
-    /* TOAST + SHEET */
     .toast-stack {
       position: fixed; top: 70px; left: 50%;
       transform: translateX(-50%);
@@ -914,7 +909,6 @@
     .sh-btn.cancel { background: var(--bg); color: var(--text-2); }
     .sh-btn.ok     { background: var(--accent); color: #fff; box-shadow: 0 4px 16px rgba(212,130,156,0.4); }
 
-    /* SYNC CARD */
     .sync-card {
       margin: 0 16px 12px;
       background: var(--surface);
@@ -1004,7 +998,6 @@
       margin-right: 4px;
     }
 
-    /* PIN GATE */
     .pin-screen {
       min-height: 100dvh;
       display: flex; flex-direction: column;
@@ -1053,7 +1046,6 @@
       text-decoration: underline; padding: 10px;
     }
 
-    /* CONFIG TAB */
     .cfg-card {
       background: var(--surface);
       border: 1.5px solid var(--border);
@@ -1696,12 +1688,15 @@ const PALETTE_HEX = [
 ];
 
 /* ══════════════════════════════════════════════
-   CONFIG — SÍNCRONIZACIÓN EN VIVO
+   CONFIG
 ══════════════════════════════════════════════ */
 const DEFAULT_CONFIG = {
   productos: [
     { id:'queso',     nombre:'Queso',     emoji:'🧀' },
-    { id:'zarzamora', nombre:'Zarzamora', emoji:'🍇' }
+    { id:'zarzamora', nombre:'Zarzamora', emoji:'🍇' },
+    { id:'canela',    nombre:'Rol de canela', emoji:'🍥' },
+    { id:'empanada',  nombre:'Empanada',  emoji:'🥟' },
+    { id:'chicas',    nombre:'Pan de chicas', emoji:'🍞' }
   ],
   departamentos: ['ALMACEN','IT','MATERIALES','FA','PRODUCTO','PRUEBAS L10','PRUEBAS L6','PROCESOS','NPI','OTRO'],
   precio: 28,
@@ -1748,7 +1743,8 @@ function applyConfigToUI() {
   }
   const revPrecio = document.getElementById('revPrecio');
   if (revPrecio) revPrecio.textContent = `$${CONFIG.precio}`;
-  if (adminAuthed) {
+  // Siempre renderizar si hay datos o el admin está autenticado
+  if (orders.length > 0 || adminAuthed) {
     renderResumen();
     renderOrders();
   }
@@ -2061,13 +2057,12 @@ document.getElementById('btnConfirmNew').addEventListener('click', () => {
 });
 
 /* ══════════════════════════════════════════════
-   ADMIN — SÍNCRONIZACIÓN EN VIVO CON FIREBASE
+   ADMIN
 ══════════════════════════════════════════════ */
 function initAdminOnce() {
   if (adminInited) return;
   adminInited = true;
 
-  // Listener en tiempo real
   ordersRef.on('value', snap => {
     orders = [];
     orderKeys = [];
@@ -2085,12 +2080,17 @@ function initAdminOnce() {
   link.searchParams.set('mode','pedido');
   document.getElementById('cfgOrderLink').textContent = link.toString();
 
-  // Configurar event listeners de admin
   setupAdminListeners();
+  
+  // Forzar renderizado inicial
+  setTimeout(() => {
+    renderOrders();
+    renderResumen();
+    updateBadge();
+  }, 300);
 }
 
 function setupAdminListeners() {
-  // Tabs
   document.querySelectorAll('#adminApp .tab').forEach(tab => {
     tab.addEventListener('click', () => {
       document.querySelectorAll('#adminApp .tab').forEach(t=>t.classList.remove('active'));
@@ -2103,7 +2103,6 @@ function setupAdminListeners() {
     });
   });
 
-  // Filtros
   document.querySelectorAll('.filter-chip').forEach(chip => {
     chip.addEventListener('click', () => {
       document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
@@ -2113,7 +2112,6 @@ function setupAdminListeners() {
     });
   });
 
-  // Búsqueda
   const searchInput = document.getElementById('searchInput');
   const searchClear = document.getElementById('searchClear');
   searchInput.addEventListener('input', () => {
@@ -2129,7 +2127,6 @@ function setupAdminListeners() {
     renderOrders();
   });
 
-  // Sync toggle
   document.getElementById('syncToggle').addEventListener('click', () => {
     const body    = document.getElementById('syncBody');
     const chevron = document.getElementById('syncChevron');
@@ -2137,7 +2134,6 @@ function setupAdminListeners() {
     chevron.classList.toggle('open', open);
   });
 
-  // Export JSON
   document.getElementById('btnExportJson').addEventListener('click', () => {
     if(!orders.length){ toast('¡No hay pedidos para guardar! 📋','warning'); return; }
     try {
@@ -2153,7 +2149,6 @@ function setupAdminListeners() {
     } catch(e) { toast('❌ Error al exportar JSON','error'); }
   });
 
-  // Import JSON
   document.getElementById('btnImportJson').addEventListener('click', () => document.getElementById('jsonFileInput').click());
   document.getElementById('jsonFileInput').addEventListener('change', async (e) => {
     const file = e.target.files[0];
@@ -2193,7 +2188,6 @@ function setupAdminListeners() {
     } catch(err) { toast('❌ El archivo JSON está dañado o es inválido','error'); }
   });
 
-  // Export CSV
   document.getElementById('btnExport').addEventListener('click', () => {
     if(!orders.length){ toast('¡No hay pedidos para exportar! 📋','warning'); return; }
     try {
@@ -2224,7 +2218,6 @@ function setupAdminListeners() {
     } catch(e) { toast('❌ Error al exportar, intenta de nuevo','error'); }
   });
 
-  // Clear all
   document.getElementById('btnClear').addEventListener('click', async () => {
     if(!orders.length){ toast('¡No hay pedidos que limpiar! 😊','warning'); return; }
     const ok = await confirmSheet('🧹','¿Limpiar todo?',
@@ -2271,47 +2264,53 @@ function filteredOrders() {
 }
 
 function renderOrders() {
-  const list   = document.getElementById('ordersList');
+  const list = document.getElementById('ordersList');
+  if (!list) return;
+  
   const subset = filteredOrders();
   const searching = searchQuery.length > 0;
 
   let labelText;
-  if(searching) {
-    labelText = subset.length === 0 ? 'Sin resultados' : `${subset.length} resultado${subset.length!==1?'s':''}`;
+  if (searching) {
+    labelText = subset.length === 0 ? 'Sin resultados' : `${subset.length} resultado${subset.length !== 1 ? 's' : ''}`;
   } else {
     labelText = subset.length === orders.length ? `${orders.length} total` : `${subset.length} de ${orders.length}`;
   }
-  document.getElementById('countLabel').textContent = labelText;
+  const countLabel = document.getElementById('countLabel');
+  if (countLabel) countLabel.textContent = labelText;
 
-  if(orders.length === 0) {
+  if (orders.length === 0) {
     list.innerHTML = `<li><div class="empty-state">
       <div class="empty-emoji">📦</div>
       <div class="empty-title">¡Sin pedidos todavía!</div>
       <div class="empty-sub">Comparte el enlace del formulario y verás los pedidos aquí al instante 🌸</div>
     </div></li>`;
-    updateBadge(); return;
+    updateBadge();
+    return;
   }
-  if(subset.length === 0) {
+  
+  if (subset.length === 0) {
     list.innerHTML = `<li><div class="empty-state">
       <div class="empty-emoji">${searching ? '🔍' : '📭'}</div>
       <div class="empty-title">${searching ? `Sin resultados para "${esc(searchQuery)}"` : 'Nada aquí'}</div>
       <div class="empty-sub">${searching ? 'Prueba con otro nombre' : 'No hay pedidos en este filtro todavía'}</div>
     </div></li>`;
-    updateBadge(); return;
+    updateBadge();
+    return;
   }
 
   list.innerHTML = subset.map((o, idx) => {
     const i = orders.indexOf(o);
     const dClass = o.delivered ? 'delivered-toggle on' : 'delivered-toggle';
-    const pClass = o.paid      ? 'paid-toggle on'      : 'paid-toggle';
-    const cardClass = ['order-card', o.delivered?'delivered':'', o.paid?'paid':''].join(' ').trim();
-    const priceMXN = `$${o.total * CONFIG.precio}`;
+    const pClass = o.paid ? 'paid-toggle on' : 'paid-toggle';
+    const cardClass = ['order-card', o.delivered ? 'delivered' : '', o.paid ? 'paid' : ''].join(' ').trim();
+    const priceMXN = `$${(o.total || 0) * CONFIG.precio}`;
 
-    const cardFlavors = o.flavors.map(f => {
+    const cardFlavors = (o.flavors || []).map(f => {
       const nombreSabor = f.nombre || productById(f.tipo).nombre;
       const emojiSabor = f.emoji || productById(f.tipo).emoji;
       const pal = paletteFor(f.tipo);
-      return `<span class="fl-badge pal-${pal}">${emojiSabor} ${nombreSabor} · ${f.cantidad}</span>`;
+      return `<span class="fl-badge pal-${pal}">${emojiSabor} ${nombreSabor} · ${f.cantidad || 0}</span>`;
     }).join('');
 
     return `
@@ -2320,15 +2319,15 @@ function renderOrders() {
         <div class="card-top">
           <div class="card-name-wrap">
             <div class="card-name">
-              ${highlightText(o.nombre, searchQuery)}
+              ${highlightText(o.nombre || 'Sin nombre', searchQuery)}
               ${o.delivered && o.paid ? '<span title="Completo">🌟</span>' : ''}
             </div>
-            <div class="card-ts">${timeAgo(o.ts)}</div>
+            <div class="card-ts">${timeAgo(o.ts || Date.now())}</div>
           </div>
-          <span class="card-dept">${esc(o.depto)}</span>
+          <span class="card-dept">${esc(o.depto || 'Sin departamento')}</span>
         </div>
         <div class="card-flavors">
-          ${cardFlavors}
+          ${cardFlavors || '<span class="fl-badge">Sin productos</span>'}
         </div>
         <div class="card-status">
           <button class="status-toggle ${dClass}" onclick="window.toggleStatus(${i},'delivered')" aria-label="Marcar entregado">
@@ -2341,7 +2340,7 @@ function renderOrders() {
           </button>
         </div>
         <div class="card-footer">
-          <span class="card-total"><strong>${o.total}</strong> ${o.total===1?'producto':'productos'}</span>
+          <span class="card-total"><strong>${o.total || 0}</strong> ${(o.total || 0) === 1 ? 'producto' : 'productos'}</span>
           <span class="card-price-tag">${priceMXN} MXN</span>
           <button class="del-btn" onclick="window.deleteOrder(${i})" aria-label="Eliminar">✕</button>
         </div>
@@ -2388,11 +2387,13 @@ Chart.defaults.font.weight = '700';
 Chart.defaults.color = '#8A6880';
 
 function buildCharts(prodLabels, prodData, prodColors, prodBorders, deptData, deliv, notDeliv, paid, notPaid) {
+  if (!document.getElementById('chartFlavors')) return;
+  
   const ctxF = document.getElementById('chartFlavors').getContext('2d');
   if(chartFlavors) chartFlavors.destroy();
   chartFlavors = new Chart(ctxF, {
     type: 'doughnut',
-    data: { labels: prodLabels, datasets: [{ data: prodData, backgroundColor: prodColors, borderColor: prodBorders, borderWidth: 2, hoverOffset: 8 }] },
+    data: { labels: prodLabels.length ? prodLabels : ['Sin datos'], datasets: [{ data: prodData.length ? prodData : [1], backgroundColor: prodColors.length ? prodColors : ['#D4829C'], borderColor: prodBorders.length ? prodBorders : ['#B5607A'], borderWidth: 2, hoverOffset: 8 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: {
@@ -2437,63 +2438,89 @@ function buildCharts(prodLabels, prodData, prodColors, prodBorders, deptData, de
    RESUMEN
 ══════════════════════════════════════════════ */
 function renderResumen() {
-  const total   = orders.reduce((s,o)=>s+o.total, 0);
-  const deliv   = orders.filter(o=>o.delivered).length;
-  const paid    = orders.filter(o=>o.paid).length;
-  const pendDel = orders.filter(o=>!o.delivered).length;
-  const pendPay = orders.filter(o=>!o.paid).length;
-  const avg     = orders.length ? (total/orders.length).toFixed(1) : 0;
+  const total = orders.reduce((s,o) => s + (o.total || 0), 0);
+  const deliv = orders.filter(o => o.delivered).length;
+  const paid = orders.filter(o => o.paid).length;
+  const pendDel = orders.filter(o => !o.delivered).length;
+  const pendPay = orders.filter(o => !o.paid).length;
+  const avg = orders.length ? (total / orders.length).toFixed(1) : 0;
 
-  const totalMXN   = total * CONFIG.precio;
-  const paidOrders = orders.filter(o=>o.paid);
-  const paidPays   = paidOrders.reduce((s,o)=>s+o.total,0);
-  const paidMXN    = paidPays * CONFIG.precio;
-  const pendMXN    = totalMXN - paidMXN;
+  const totalMXN = total * CONFIG.precio;
+  const paidOrders = orders.filter(o => o.paid);
+  const paidPays = paidOrders.reduce((s, o) => s + (o.total || 0), 0);
+  const paidMXN = paidPays * CONFIG.precio;
+  const pendMXN = totalMXN - paidMXN;
 
-  document.getElementById('revLabel').textContent    = `💵 Recaudación total a $${CONFIG.precio}`;
-  document.getElementById('revTotal').textContent    = totalMXN.toLocaleString('es-MX');
-  document.getElementById('revSub').textContent      = `${total} producto${total!==1?'s':''} × $${CONFIG.precio} MXN`;
-  document.getElementById('revCobrado').textContent  = `$${paidMXN.toLocaleString('es-MX')}`;
-  document.getElementById('revPorCobrar').textContent = `$${pendMXN.toLocaleString('es-MX')}`;
-  document.getElementById('revPrecio').textContent   = `$${CONFIG.precio}`;
+  const setText = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
 
-  document.getElementById('statPays').textContent      = total;
-  document.getElementById('statOrders').textContent    = orders.length;
-  document.getElementById('statDelivered').textContent = deliv;
-  document.getElementById('statPaid').textContent      = paid;
-  document.getElementById('statAvg').textContent       = avg;
-  document.getElementById('pendDelivery').textContent  = pendDel;
-  document.getElementById('pendPayment').textContent   = pendPay;
+  setText('revLabel', `💵 Recaudación total a $${CONFIG.precio}`);
+  setText('revTotal', totalMXN.toLocaleString('es-MX') || '0');
+  setText('revSub', `${total} producto${total !== 1 ? 's' : ''} × $${CONFIG.precio} MXN`);
+  setText('revCobrado', `$${paidMXN.toLocaleString('es-MX')}`);
+  setText('revPorCobrar', `$${pendMXN.toLocaleString('es-MX')}`);
+  setText('revPrecio', `$${CONFIG.precio}`);
+  setText('statPays', total || '0');
+  setText('statOrders', orders.length || '0');
+  setText('statDelivered', deliv || '0');
+  setText('statPaid', paid || '0');
+  setText('statAvg', avg || '0');
+  setText('pendDelivery', pendDel || '0');
+  setText('pendPayment', pendPay || '0');
 
-  // Por producto
-  const prodQty = CONFIG.productos.map(p => orders.reduce((s,o)=>s+o.flavors.filter(f=>f.tipo===p.id || f.nombre===p.nombre).reduce((a,f)=>a+f.cantidad,0),0));
-  const maxQty  = Math.max(...prodQty, 1);
   const barsWrap = document.getElementById('flavorBarsContainer');
-  barsWrap.innerHTML = CONFIG.productos.map((p,idx) => `
-    <div class="fl-bar-row">
-      <span class="fl-bar-lbl">${p.emoji} ${esc(p.nombre)}</span>
-      <div class="bar-track"><div class="bar-fill pal-${idx%6}" style="width:${(prodQty[idx]/maxQty)*100}%"></div></div>
-      <span class="fl-bar-num">${prodQty[idx]}</span>
-    </div>`).join('') || '<div style="text-align:center;color:var(--text-3);font-weight:600;font-size:13px">Sin productos configurados</div>';
+  if (barsWrap) {
+    try {
+      const prodQty = CONFIG.productos.map(p => 
+        orders.reduce((s, o) => s + (o.flavors || []).filter(f => f.tipo === p.id || f.nombre === p.nombre).reduce((a, f) => a + (f.cantidad || 0), 0), 0)
+      );
+      const maxQty = Math.max(...prodQty, 1);
+      barsWrap.innerHTML = CONFIG.productos.map((p, idx) => `
+        <div class="fl-bar-row">
+          <span class="fl-bar-lbl">${p.emoji} ${esc(p.nombre)}</span>
+          <div class="bar-track"><div class="bar-fill pal-${idx % 6}" style="width:${(prodQty[idx] / maxQty) * 100}%"></div></div>
+          <span class="fl-bar-num">${prodQty[idx]}</span>
+        </div>`).join('') || '<div style="text-align:center;color:var(--text-3);font-weight:600;font-size:13px">Sin productos configurados</div>';
+    } catch(e) {
+      barsWrap.innerHTML = '<div style="text-align:center;color:var(--text-3);font-weight:600;font-size:13px">Cargando productos...</div>';
+    }
+  }
 
-  // Dept
-  const dmap = {};
-  orders.forEach(o => { dmap[o.depto] = (dmap[o.depto]||0)+o.total; });
-  const sorted = Object.entries(dmap).sort((a,b)=>b[1]-a[1]);
   const dc = document.getElementById('deptCard');
-  dc.innerHTML = sorted.length === 0
-    ? '<div class="dept-row"><span class="dept-name" style="color:var(--text-3)">Sin datos todavía 🌸</span></div>'
-    : sorted.map(([n,c])=>`
-        <div class="dept-row">
-          <span class="dept-name">${esc(n)}</span>
-          <span class="dept-revenue">$${(c*CONFIG.precio).toLocaleString('es-MX')}</span>
-          <span class="dept-count">${c} ${c===1?'producto':'productos'}</span>
-        </div>`).join('');
+  if (dc) {
+    try {
+      const dmap = {};
+      orders.forEach(o => { dmap[o.depto] = (dmap[o.depto] || 0) + (o.total || 0); });
+      const sorted = Object.entries(dmap).sort((a, b) => b[1] - a[1]);
+      dc.innerHTML = sorted.length === 0
+        ? '<div class="dept-row"><span class="dept-name" style="color:var(--text-3)">Sin datos todavía 🌸</span></div>'
+        : sorted.map(([n, c]) => `
+            <div class="dept-row">
+              <span class="dept-name">${esc(n)}</span>
+              <span class="dept-revenue">$${(c * CONFIG.precio).toLocaleString('es-MX')}</span>
+              <span class="dept-count">${c} ${c === 1 ? 'producto' : 'productos'}</span>
+            </div>`).join('');
+    } catch(e) {
+      dc.innerHTML = '<div class="dept-row"><span class="dept-name" style="color:var(--text-3)">Cargando departamentos...</span></div>';
+    }
+  }
 
-  const prodLabels = CONFIG.productos.map(p=>`${p.emoji} ${p.nombre}`);
-  const prodColors = CONFIG.productos.map((p,idx)=>PALETTE_HEX[idx%6].bg);
-  const prodBorders= CONFIG.productos.map((p,idx)=>PALETTE_HEX[idx%6].border);
-  buildCharts(prodLabels, prodQty, prodColors, prodBorders, sorted, deliv, pendDel, paid, pendPay);
+  try {
+    const prodQty = CONFIG.productos.map(p => 
+      orders.reduce((s, o) => s + (o.flavors || []).filter(f => f.tipo === p.id || f.nombre === p.nombre).reduce((a, f) => a + (f.cantidad || 0), 0), 0)
+    );
+    const prodLabels = CONFIG.productos.map(p => `${p.emoji} ${p.nombre}`);
+    const prodColors = CONFIG.productos.map((p, idx) => PALETTE_HEX[idx % 6].bg);
+    const prodBorders = CONFIG.productos.map((p, idx) => PALETTE_HEX[idx % 6].border);
+    const dmap = {};
+    orders.forEach(o => { dmap[o.depto] = (dmap[o.depto] || 0) + (o.total || 0); });
+    const sorted = Object.entries(dmap).sort((a, b) => b[1] - a[1]);
+    buildCharts(prodLabels, prodQty, prodColors, prodBorders, sorted, deliv, pendDel, paid, pendPay);
+  } catch(e) {
+    console.error('Error al construir gráficas:', e);
+  }
 }
 
 /* ══════════════════════════════════════════════
